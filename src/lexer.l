@@ -1,8 +1,9 @@
 
-%option noyywrap
+%option noyywrap nounput noinput
 
 %{
-#include <stdio.h>
+#include <cstdio>
+#include <string>
 #include "parser.tab.h"
 %}
 
@@ -18,6 +19,7 @@ NUMBER      {DIGIT}+
 "else"      { return ELSE; }
 "while"     { return WHILE; }
 "return"    { return RETURN; }
+"print"     { return PRINT; }
 
 "=="        { return EQ; }
 "!="        { return NE; }
@@ -26,8 +28,15 @@ NUMBER      {DIGIT}+
 "&&"        { return AND; }
 "||"        { return OR; }
 
-{NUMBER}      { return NUMBER; }
-{IDENTIFIER}  { return IDENTIFIER; }
+{NUMBER} {
+    yylval.text = new std::string(yytext);
+    return NUMBER;
+}
+
+{IDENTIFIER} {
+    yylval.text = new std::string(yytext);
+    return IDENTIFIER;
+}
 
 [+\-*/%=<>!]  { return yytext[0]; }
 [(){};]       { return yytext[0]; }
