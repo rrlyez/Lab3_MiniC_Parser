@@ -1,0 +1,228 @@
+{
+  "type": "Program",
+  "value": "main",
+  "children": [
+    {
+      "type": "Block",
+      "value": "",
+      "children": [
+        {
+          "type": "Declaration",
+          "value": "a",
+          "children": [
+            {
+              "type": "Number",
+              "value": "10",
+              "children": [
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Declaration",
+          "value": "b",
+          "children": [
+            {
+              "type": "Number",
+              "value": "5",
+              "children": [
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Declaration",
+          "value": "result",
+          "children": [
+            {
+              "type": "BinaryOp",
+              "value": "+",
+              "children": [
+                {
+                  "type": "Variable",
+                  "value": "a",
+                  "children": [
+                  ]
+                },
+                {
+                  "type": "BinaryOp",
+                  "value": "*",
+                  "children": [
+                    {
+                      "type": "Variable",
+                      "value": "b",
+                      "children": [
+                      ]
+                    },
+                    {
+                      "type": "Number",
+                      "value": "2",
+                      "children": [
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Print",
+          "value": "",
+          "children": [
+            {
+              "type": "Variable",
+              "value": "result",
+              "children": [
+              ]
+            }
+          ]
+        },
+        {
+          "type": "If",
+          "value": "",
+          "children": [
+            {
+              "type": "BinaryOp",
+              "value": ">",
+              "children": [
+                {
+                  "type": "Variable",
+                  "value": "result",
+                  "children": [
+                  ]
+                },
+                {
+                  "type": "Number",
+                  "value": "15",
+                  "children": [
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Block",
+              "value": "",
+              "children": [
+                {
+                  "type": "Assignment",
+                  "value": "result",
+                  "children": [
+                    {
+                      "type": "BinaryOp",
+                      "value": "+",
+                      "children": [
+                        {
+                          "type": "Variable",
+                          "value": "result",
+                          "children": [
+                          ]
+                        },
+                        {
+                          "type": "Number",
+                          "value": "10",
+                          "children": [
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Print",
+          "value": "",
+          "children": [
+            {
+              "type": "Variable",
+              "value": "result",
+              "children": [
+              ]
+            }
+          ]
+        },
+        {
+          "type": "While",
+          "value": "",
+          "children": [
+            {
+              "type": "BinaryOp",
+              "value": "<",
+              "children": [
+                {
+                  "type": "Variable",
+                  "value": "result",
+                  "children": [
+                  ]
+                },
+                {
+                  "type": "Number",
+                  "value": "35",
+                  "children": [
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Block",
+              "value": "",
+              "children": [
+                {
+                  "type": "Assignment",
+                  "value": "result",
+                  "children": [
+                    {
+                      "type": "BinaryOp",
+                      "value": "+",
+                      "children": [
+                        {
+                          "type": "Variable",
+                          "value": "result",
+                          "children": [
+                          ]
+                        },
+                        {
+                          "type": "Number",
+                          "value": "1",
+                          "children": [
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Print",
+          "value": "",
+          "children": [
+            {
+              "type": "Variable",
+              "value": "result",
+              "children": [
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Return",
+          "value": "",
+          "children": [
+            {
+              "type": "Number",
+              "value": "0",
+              "children": [
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

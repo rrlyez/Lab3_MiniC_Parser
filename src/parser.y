@@ -2,6 +2,10 @@
 %code requires {
 #include "../include/ast.h"
 #include <string>
+#include "../include/interpreter.h"
+#include "../include/codegen.h"
+#include "../include/visualizer.h"
+#include "../include/json_exporter.h"
 }
 
 %{
@@ -221,14 +225,40 @@ void yyerror(const char *message) {
 }
 
 int main() {
-    if (yyparse() != 0)
+    if (yyparse() != 0) {
         return 1;
+    }
+
+    if (!root) {
+        std::cerr << "Error: AST was not created\n";
+        return 1;
+    }
 
     std::cout << "Parsing successful!\n\n";
-    std::cout << "Abstract Syntax Tree:\n";
 
-    if (root)
-        print_ast(*root);
+    std::cout << "Abstract Syntax Tree:\n";
+    print_ast(*root);
+
+    try {
+        std::cout << "\nProgram output:\n";
+        execute_program(*root);
+
+        generate_python(*root, "output/generated.py");
+
+        std::cout << "\nPython code generated successfully!\n";
+        std::cout << "Saved to: output/generated.py\n";
+
+        export_ast_dot(*root, "output/ast.dot");
+        export_ast_json(*root, "web/ast.json");
+
+        std::cout << "\nAST DOT file generated successfully!\n";
+        std::cout << "Saved to: output/ast.dot\n";
+        std::cout << "AST JSON saved to: web/ast.json\n";
+
+    } catch (const std::exception& error) {
+        std::cerr << "Error: " << error.what() << '\n';
+        return 1;
+    }
 
     return 0;
 }

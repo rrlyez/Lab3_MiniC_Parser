@@ -1,8 +1,21 @@
+
+# Compiled files
 output/*.exe
 output/*.o
+
+# Generated Flex/Bison files
 output/lex.yy.c
 output/parser.tab.c
 output/parser.tab.h
 output/parser.output
 
+# VS Code settings
 .vscode/
+
+# Temporary files
+Appending
+Updating
+
+# Python cache
+__pycache__/
+*.pyc

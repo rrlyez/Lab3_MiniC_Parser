@@ -1,0 +1,209 @@
+
+#include "../include/codegen.h"
+
+#include <fstream>
+#include <stdexcept>
+#include <string>
+#include <unordered_map>
+#include <vector>
+
+class PythonGenerator {
+private:
+    std::ofstream out;
+    std::vector<std::unordered_map<std::string, std::string>> scopes;
+    int variable_id = 0;
+
+    std::string indent(int level) {
+        return std::string(level * 4, ' ');
+    }
+
+    std::string find_variable(const std::string& name) {
+        for (auto it = scopes.rbegin(); it != scopes.rend(); ++it) {
+            auto found = it->find(name);
+
+            if (found != it->end()) {
+                return found->second;
+            }
+        }
+
+        throw std::runtime_error("Undeclared variable: " + name);
+    }
+
+    std::string expression(const ASTNode& node) {
+        if (node.type == NodeType::Number) {
+            return node.value;
+        }
+
+        if (node.type == NodeType::Variable) {
+            return find_variable(node.value);
+        }
+
+        if (node.type == NodeType::UnaryOp) {
+            std::string value = expression(*node.children[0]);
+
+            if (node.value == "!") {
+                return "int(not (" + value + "))";
+            }
+
+            return "(-(" + value + "))";
+        }
+
+        if (node.type == NodeType::BinaryOp) {
+            std::string left = expression(*node.children[0]);
+            std::string right = expression(*node.children[1]);
+            const std::string& op = node.value;
+
+            if (op == "/") {
+                return "c_div(" + left + ", " + right + ")";
+            }
+
+            if (op == "%") {
+                return "c_mod(" + left + ", " + right + ")";
+            }
+
+            if (op == "&&") {
+                return "int(bool(" + left + ") and bool("
+                       + right + "))";
+            }
+
+            if (op == "||") {
+                return "int(bool(" + left + ") or bool("
+                       + right + "))";
+            }
+
+            return "(" + left + " " + op + " " + right + ")";
+        }
+
+        throw std::runtime_error("Unsupported expression");
+    }
+
+    void statement(const ASTNode& node, int level) {
+        std::string spaces = indent(level);
+
+        switch (node.type) {
+            case NodeType::Program:
+                statement(*node.children[0], level);
+                break;
+
+            case NodeType::Block: {
+                scopes.emplace_back();
+
+                if (node.children.empty()) {
+                    out << spaces << "pass\n";
+                }
+
+                for (const auto& child : node.children) {
+                    statement(*child, level);
+                }
+
+                scopes.pop_back();
+                break;
+            }
+
+            case NodeType::Declaration: {
+                if (scopes.back().count(node.value)) {
+                    throw std::runtime_error(
+                        "Variable already declared: " + node.value
+                    );
+                }
+
+                std::string value = node.children.empty()
+                    ? "0"
+                    : expression(*node.children[0]);
+
+                std::string name =
+                    "__v" + std::to_string(variable_id++);
+
+                scopes.back()[node.value] = name;
+
+                out << spaces << name << " = " << value
+                    << "  # " << node.value << "\n";
+                break;
+            }
+
+            case NodeType::Assignment:
+                out << spaces << find_variable(node.value)
+                    << " = " << expression(*node.children[0])
+                    << "\n";
+                break;
+
+            case NodeType::Print:
+                out << spaces << "print("
+                    << expression(*node.children[0]) << ")\n";
+                break;
+
+            case NodeType::Return:
+                out << spaces << "return "
+                    << expression(*node.children[0]) << "\n";
+                break;
+
+            case NodeType::If:
+                out << spaces << "if "
+                    << expression(*node.children[0]) << ":\n";
+
+                statement(*node.children[1], level + 1);
+
+                if (node.children.size() == 3) {
+                    out << spaces << "else:\n";
+                    statement(*node.children[2], level + 1);
+                }
+                break;
+
+            case NodeType::While:
+                out << spaces << "while "
+                    << expression(*node.children[0]) << ":\n";
+
+                statement(*node.children[1], level + 1);
+                break;
+
+            default:
+                throw std::runtime_error("Unsupported statement");
+        }
+    }
+
+public:
+    explicit PythonGenerator(const std::string& filename)
+        : out(filename) {
+        if (!out) {
+            throw std::runtime_error(
+                "Cannot create output file: " + filename
+            );
+        }
+    }
+
+    void generate(const ASTNode& root) {
+        out << "# Generated by MiniC Parser\n\n";
+
+        out << "def c_div(a, b):\n";
+        out << "    if b == 0:\n";
+        out << "        raise ZeroDivisionError('Division by zero')\n";
+        out << "    q = abs(a) // abs(b)\n";
+        out << "    return -q if (a < 0) != (b < 0) else q\n\n";
+
+        out << "def c_mod(a, b):\n";
+        out << "    return a - c_div(a, b) * b\n\n";
+
+        out << "def main():\n";
+
+        if (root.type != NodeType::Program) {
+            throw std::runtime_error("Expected Program node");
+        }
+
+        statement(root, 1);
+
+        out << "\nif __name__ == '__main__':\n";
+        out << "    main()\n";
+
+        if (!out) {
+            throw std::runtime_error("Failed to write Python file");
+        }
+    }
+};
+
+void generate_python(
+    const ASTNode& root,
+    const std::string& filename
+) {
+    PythonGenerator generator(filename);
+    generator.generate(root);
+}
