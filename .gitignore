@@ -1,0 +1,8 @@
+output/*.exe
+output/*.o
+output/lex.yy.c
+output/parser.tab.c
+output/parser.tab.h
+output/parser.output
+
+.vscode/

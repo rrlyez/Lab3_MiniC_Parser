@@ -7,12 +7,21 @@ int yylex(void);
 void yyerror(const char *message);
 %}
 
-%token INT IF RETURN IDENTIFIER NUMBER EQ
-
-%left '+' '-'
-%left '*' '/'
+%token INT IF ELSE WHILE RETURN
+%token IDENTIFIER NUMBER
+%token EQ NE LE GE AND OR
 
 %start program
+
+%precedence IF_WITHOUT_ELSE
+%precedence ELSE
+
+%left OR
+%left AND
+%nonassoc EQ NE '<' '>' LE GE
+%left '+' '-'
+%left '*' '/' '%'
+%right '!' UMINUS
 
 %%
 
@@ -33,17 +42,14 @@ statements:
     ;
 
 statement:
-      INT IDENTIFIER '=' expression ';'
+      INT IDENTIFIER ';'
+    | INT IDENTIFIER '=' expression ';'
     | IDENTIFIER '=' expression ';'
-    | IF '(' condition ')' block
+    | IF '(' expression ')' statement %prec IF_WITHOUT_ELSE
+    | IF '(' expression ')' statement ELSE statement
+    | WHILE '(' expression ')' statement
     | RETURN expression ';'
     | block
-    ;
-
-condition:
-      expression '>' expression
-    | expression '<' expression
-    | expression EQ expression
     ;
 
 expression:
@@ -53,6 +59,17 @@ expression:
     | expression '-' expression
     | expression '*' expression
     | expression '/' expression
+    | expression '%' expression
+    | expression '<' expression
+    | expression '>' expression
+    | expression LE expression
+    | expression GE expression
+    | expression EQ expression
+    | expression NE expression
+    | expression AND expression
+    | expression OR expression
+    | '!' expression
+    | '-' expression %prec UMINUS
     | '(' expression ')'
     ;
 
